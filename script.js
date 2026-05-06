@@ -1,4 +1,6 @@
 const storageKey = 'northline-studio-organizer-items';
+const apiPath = '/api/items';
+const sharedBoardEnabled = window.location.protocol === 'http:' || window.location.protocol === 'https:';
 const defaultItems = [
   {
     type: 'text',
@@ -12,6 +14,7 @@ let items = loadItems();
 const itemList = document.querySelector('#itemList');
 const itemCount = document.querySelector('#itemCount');
 const resetButton = document.querySelector('#resetButton');
+const syncStatus = document.querySelector('#syncStatus');
 const emptyState = document.querySelector('#emptyState');
 const searchInput = document.querySelector('#searchInput');
 const imageInput = document.querySelector('#imageInput');
@@ -32,6 +35,9 @@ const colorSwatches = document.querySelectorAll('.color-swatch');
 let activeDialogType = 'text';
 let isDrawing = false;
 let activeSketchColor = '#1d2528';
+let lastSharedPayload = '';
+let isSavingSharedBoard = false;
+let pendingSharedSave = false;
 
 function loadItems() {
   const savedItems = localStorage.getItem(storageKey);
@@ -50,6 +56,85 @@ function saveItems() {
     localStorage.setItem(storageKey, JSON.stringify(items));
   } catch {
     window.alert('The browser could not save this item. Try using a smaller image or sketch.');
+  }
+
+  saveSharedItems();
+}
+
+function updateSyncStatus(text) {
+  syncStatus.textContent = text;
+}
+
+async function loadSharedItems() {
+  if (!sharedBoardEnabled) return;
+
+  try {
+    const response = await fetch(apiPath, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Shared board unavailable');
+
+    const sharedItems = await response.json();
+    if (!Array.isArray(sharedItems)) throw new Error('Shared board data is invalid');
+
+    items = sharedItems;
+    lastSharedPayload = JSON.stringify(items);
+    localStorage.setItem(storageKey, lastSharedPayload);
+    updateSyncStatus('Shared board');
+    renderItems();
+  } catch {
+    updateSyncStatus('Local board');
+  }
+}
+
+async function saveSharedItems() {
+  if (!sharedBoardEnabled) return;
+  if (isSavingSharedBoard) {
+    pendingSharedSave = true;
+    return;
+  }
+
+  const payload = JSON.stringify(items);
+  if (payload === lastSharedPayload) return;
+
+  isSavingSharedBoard = true;
+  try {
+    const response = await fetch(apiPath, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    });
+    if (!response.ok) throw new Error('Shared board save failed');
+
+    lastSharedPayload = payload;
+    updateSyncStatus('Shared board');
+  } catch {
+    updateSyncStatus('Not synced');
+  } finally {
+    isSavingSharedBoard = false;
+    if (pendingSharedSave) {
+      pendingSharedSave = false;
+      saveSharedItems();
+    }
+  }
+}
+
+async function refreshSharedItems() {
+  if (!sharedBoardEnabled || isSavingSharedBoard) return;
+
+  try {
+    const response = await fetch(apiPath, { cache: 'no-store' });
+    if (!response.ok) throw new Error('Shared board unavailable');
+
+    const sharedItems = await response.json();
+    const payload = JSON.stringify(sharedItems);
+    if (!Array.isArray(sharedItems) || payload === lastSharedPayload) return;
+
+    items = sharedItems;
+    lastSharedPayload = payload;
+    localStorage.setItem(storageKey, payload);
+    updateSyncStatus('Shared board');
+    renderItems();
+  } catch {
+    updateSyncStatus('Local board');
   }
 }
 
@@ -398,3 +483,7 @@ resetButton.addEventListener('click', resetItems);
 
 setupCanvas();
 renderItems();
+loadSharedItems();
+if (sharedBoardEnabled) {
+  window.setInterval(refreshSharedItems, 2500);
+}

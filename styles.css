@@ -165,6 +165,13 @@ h1 {
   white-space: nowrap;
 }
 
+.sync-status {
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .list-actions {
   display: flex;
   align-items: center;
