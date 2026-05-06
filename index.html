@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northline Studio Organizer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="studio-header">
+      <p class="kicker">Northline Studio</p>
+      <h1>Studio Organizer</h1>
+    </header>
+
+    <nav class="tool-row" aria-label="Organizer tools">
+      <button class="tool-button" type="button" data-action="text">Enter Text</button>
+      <button class="tool-button" type="button" data-action="image">Upload Image</button>
+      <button class="tool-button" type="button" data-action="link">Upload Links</button>
+      <button class="tool-button" type="button" data-action="sketch">Sketches</button>
+      <button class="tool-button" type="button" data-action="other">Others</button>
+      <button class="tool-button" type="button" data-action="project">Add New Project</button>
+    </nav>
+
+    <section class="search-panel" aria-label="Search organizer list">
+      <input id="searchInput" type="search" placeholder="Search the organizer..." autocomplete="off">
+    </section>
+
+    <section class="list-panel" aria-label="Organizer items">
+      <div class="list-heading">
+        <h2>Studio Board</h2>
+        <div class="list-actions">
+          <span id="itemCount">0 items</span>
+          <button id="resetButton" class="reset-button" type="button">Reset</button>
+        </div>
+      </div>
+      <ul id="itemList" class="item-list"></ul>
+      <p id="emptyState" class="empty-state">Add text, images, links, sketches, or other notes to start organizing the studio.</p>
+    </section>
+  </main>
+
+  <input id="imageInput" class="file-input" type="file" accept="image/*">
+
+  <dialog id="textDialog" class="dialog">
+    <form method="dialog" class="dialog-card">
+      <h2 id="dialogTitle">Add Item</h2>
+      <label for="itemTitle">Title</label>
+      <input id="itemTitle" type="text" maxlength="80" required>
+      <label for="itemBody">Details</label>
+      <textarea id="itemBody" rows="5"></textarea>
+      <menu>
+        <button type="button" class="secondary-button" value="cancel">Cancel</button>
+        <button type="submit" class="primary-button" value="default">Add</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="sketchDialog" class="dialog sketch-dialog">
+    <form method="dialog" class="dialog-card">
+      <h2>New Sketch</h2>
+      <div class="sketch-tools" aria-label="Sketch colors">
+        <button class="color-swatch selected" type="button" data-color="#1d2528" style="--swatch-color: #1d2528" aria-label="Black"></button>
+        <button class="color-swatch" type="button" data-color="#c45f3c" style="--swatch-color: #c45f3c" aria-label="Clay red"></button>
+        <button class="color-swatch" type="button" data-color="#0f766e" style="--swatch-color: #0f766e" aria-label="Northline green"></button>
+        <button class="color-swatch" type="button" data-color="#2f74b5" style="--swatch-color: #2f74b5" aria-label="Blue"></button>
+        <button class="color-swatch" type="button" data-color="#f2c94c" style="--swatch-color: #f2c94c" aria-label="Yellow"></button>
+        <label class="custom-color">
+          <span>Custom</span>
+          <input id="sketchColor" type="color" value="#1d2528" aria-label="Custom sketch color">
+        </label>
+      </div>
+      <canvas id="sketchCanvas" width="720" height="360" aria-label="Sketch canvas"></canvas>
+      <menu>
+        <button type="button" class="secondary-button" id="clearSketch">Clear</button>
+        <button type="button" class="secondary-button" value="cancel">Cancel</button>
+        <button type="submit" class="primary-button">Save Sketch</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="projectDialog" class="dialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Add New Project</h2>
+      <label for="projectTitle">Project name</label>
+      <input id="projectTitle" type="text" maxlength="80" required>
+      <label for="projectBody">Project details</label>
+      <textarea id="projectBody" rows="3"></textarea>
+      <label for="projectTasks">Checklist items</label>
+      <textarea id="projectTasks" rows="6" placeholder="One checkbox item per line"></textarea>
+      <menu>
+        <button type="button" class="secondary-button" value="cancel">Cancel</button>
+        <button type="submit" class="primary-button">Add Project</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="script.js"></script>
+</body>
+</html>
