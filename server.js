@@ -64,8 +64,14 @@ function serveFile(request, response) {
   const safePath = path.normalize(requestPath);
   const filePath = path.join(rootDir, safePath);
   const resolvedPath = path.resolve(filePath);
+  const resolvedRoot = path.resolve(rootDir);
 
-  if (!resolvedPath.startsWith(rootDir) || safePath.startsWith('..')) {
+  if (!resolvedPath.startsWith(resolvedRoot + path.sep) && resolvedPath !== resolvedRoot) {
+    send(response, 403, 'Forbidden');
+    return;
+  }
+
+  if (safePath.startsWith('..')) {
     send(response, 403, 'Forbidden');
     return;
   }
